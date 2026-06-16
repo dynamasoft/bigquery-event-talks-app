@@ -10,6 +10,7 @@ let appState = {
 // DOM Elements
 const elements = {
     refreshBtn: document.getElementById('refresh-btn'),
+    exportCsvBtn: document.getElementById('export-csv-btn'),
     refreshIcon: document.getElementById('refresh-icon'),
     spinner: document.getElementById('spinner'),
     syncText: document.getElementById('sync-text'),
@@ -51,6 +52,11 @@ function setupEventListeners() {
     // Refresh & Retry Buttons
     elements.refreshBtn.addEventListener('click', () => fetchNotes(true));
     elements.retryBtn.addEventListener('click', () => fetchNotes(true));
+    
+    // Export CSV Button
+    if (elements.exportCsvBtn) {
+        elements.exportCsvBtn.addEventListener('click', exportToCsv);
+    }
     
     // Search input
     elements.searchInput.addEventListener('input', (e) => {
@@ -279,6 +285,15 @@ function renderTimeline() {
                         <span class="category-badge">${update.type}</span>
                     </div>
                     <div class="card-actions">
+                        <button class="btn-icon-copy" title="Copy text to clipboard" data-id="${update.id}">
+                            <svg class="icon-copy" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            <svg class="icon-check icon-hidden" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </button>
                         <button class="btn-icon-tweet" title="Tweet about this update" data-id="${update.id}">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -293,11 +308,18 @@ function renderTimeline() {
             
             // Card Click Handling (Toggle selection)
             cardEl.addEventListener('click', (e) => {
-                // Ignore click if it's the Tweet button or a link inside content
-                if (e.target.closest('.btn-icon-tweet') || e.target.closest('a')) {
+                // Ignore click if it's the Tweet button, Copy button, or a link inside content
+                if (e.target.closest('.btn-icon-tweet') || e.target.closest('.btn-icon-copy') || e.target.closest('a')) {
                     return;
                 }
                 toggleSelection(update, cardEl);
+            });
+            
+            // Copy Button Click Handling
+            const copyBtn = cardEl.querySelector('.btn-icon-copy');
+            copyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                copyToClipboard(update, copyBtn);
             });
             
             // Tweet Button Click Handling
@@ -428,4 +450,82 @@ function tweetSelectedUpdates() {
     const tweetText = `${header}${itemsText}${footer}`;
     const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
     window.open(tweetUrl, '_blank', 'width=600,height=400');
+}
+
+// Copy plain text content of an update to clipboard
+async function copyToClipboard(update, buttonEl) {
+    const copyIcon = buttonEl.querySelector('.icon-copy');
+    const checkIcon = buttonEl.querySelector('.icon-check');
+    
+    try {
+        await navigator.clipboard.writeText(update.text);
+        
+        // Show checkmark icon
+        copyIcon.classList.add('icon-hidden');
+        checkIcon.classList.remove('icon-hidden');
+        
+        // Reset after 1.5 seconds
+        setTimeout(() => {
+            copyIcon.classList.remove('icon-hidden');
+            checkIcon.classList.add('icon-hidden');
+        }, 1500);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        alert('Could not copy text to clipboard. Please select and copy manually.');
+    }
+}
+
+// Export the currently filtered list of release notes to CSV
+function exportToCsv() {
+    const filteredNotes = getFilteredNotes();
+    if (filteredNotes.length === 0) {
+        alert('No data available to export.');
+        return;
+    }
+    
+    // Flat list of all updates
+    const csvRows = [];
+    
+    // CSV Headers
+    csvRows.push(['Date', 'Type', 'Description', 'Link'].map(escapeCsvCell).join(','));
+    
+    filteredNotes.forEach(entry => {
+        entry.updates.forEach(update => {
+            const row = [
+                update.date,
+                update.type,
+                update.text,
+                update.link
+            ];
+            csvRows.push(row.map(escapeCsvCell).join(','));
+        });
+    });
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${new Date().toISOString().slice(0,10)}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Helper: Escape cells for CSV formatting
+function escapeCsvCell(cell) {
+    if (cell === null || cell === undefined) {
+        return '';
+    }
+    let cellStr = String(cell);
+    // Escape double quotes by doubling them
+    cellStr = cellStr.replace(/"/g, '""');
+    // If the cell contains commas, newlines, or quotes, wrap it in double quotes
+    if (cellStr.includes(',') || cellStr.includes('\n') || cellStr.includes('\r') || cellStr.includes('"')) {
+        cellStr = `"${cellStr}"`;
+    }
+    return cellStr;
 }

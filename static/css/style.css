@@ -686,6 +686,7 @@ body {
 .card-actions {
     display: flex;
     align-items: center;
+    gap: 0.5rem;
     opacity: 0.3;
     transition: opacity var(--transition-fast);
 }
@@ -695,7 +696,7 @@ body {
     opacity: 1;
 }
 
-.btn-icon-tweet {
+.btn-icon-tweet, .btn-icon-copy {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border-color);
     color: var(--text-secondary);
@@ -713,6 +714,12 @@ body {
     color: #000000;
     border-color: #ffffff;
     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.15);
+}
+
+.btn-icon-copy:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
 }
 
 /* Content Area */
