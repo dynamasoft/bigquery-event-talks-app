@@ -1,3 +1,7 @@
+// Theme Initialization (Avoid FOUC)
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+
 // Application State
 let appState = {
     notes: [], // Complete parsed timeline data
@@ -11,6 +15,7 @@ let appState = {
 const elements = {
     refreshBtn: document.getElementById('refresh-btn'),
     exportCsvBtn: document.getElementById('export-csv-btn'),
+    themeToggleBtn: document.getElementById('theme-toggle-btn'),
     refreshIcon: document.getElementById('refresh-icon'),
     spinner: document.getElementById('spinner'),
     syncText: document.getElementById('sync-text'),
@@ -42,6 +47,7 @@ const elements = {
 document.addEventListener('DOMContentLoaded', () => {
     fetchNotes();
     setupEventListeners();
+    updateThemeIcons();
     
     // Periodically update the relative last-updated timestamp
     setInterval(updateSyncTimeDisplay, 60000);
@@ -56,6 +62,11 @@ function setupEventListeners() {
     // Export CSV Button
     if (elements.exportCsvBtn) {
         elements.exportCsvBtn.addEventListener('click', exportToCsv);
+    }
+    
+    // Theme Toggle Button
+    if (elements.themeToggleBtn) {
+        elements.themeToggleBtn.addEventListener('click', toggleTheme);
     }
     
     // Search input
@@ -528,4 +539,32 @@ function escapeCsvCell(cell) {
         cellStr = `"${cellStr}"`;
     }
     return cellStr;
+}
+
+// Toggle color scheme theme
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    updateThemeIcons();
+}
+
+// Update the visible toggle icon based on the current theme
+function updateThemeIcons() {
+    if (!elements.themeToggleBtn) return;
+    
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const sunIcon = elements.themeToggleBtn.querySelector('.icon-sun');
+    const moonIcon = elements.themeToggleBtn.querySelector('.icon-moon');
+    
+    if (currentTheme === 'light') {
+        sunIcon.classList.add('icon-hidden');
+        moonIcon.classList.remove('icon-hidden');
+    } else {
+        sunIcon.classList.remove('icon-hidden');
+        moonIcon.classList.add('icon-hidden');
+    }
 }

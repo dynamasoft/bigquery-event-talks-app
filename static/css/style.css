@@ -35,6 +35,82 @@
     --font-body: 'Inter', sans-serif;
 }
 
+[data-theme="light"] {
+    --bg-base: #f8fafc;
+    --bg-surface: rgba(255, 255, 255, 0.7);
+    --bg-surface-hover: rgba(241, 245, 249, 0.85);
+    --bg-card: rgba(0, 0, 0, 0.02);
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(0, 0, 0, 0.16);
+    
+    --color-primary: #4f46e5;
+    --color-primary-rgb: 79, 70, 229;
+    --color-secondary: #9333ea;
+    
+    /* Category Badges */
+    --color-feature: #059669;
+    --color-feature-bg: rgba(5, 150, 105, 0.1);
+    --color-issue: #e11d48;
+    --color-issue-bg: rgba(225, 29, 72, 0.1);
+    --color-deprecation: #d97706;
+    --color-deprecation-bg: rgba(217, 119, 6, 0.1);
+    --color-change: #7c3aed;
+    --color-change-bg: rgba(124, 58, 237, 0.1);
+    --color-generic: #2563eb;
+    --color-generic-bg: rgba(37, 99, 235, 0.1);
+    
+    /* Text Colors */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+}
+
+/* Light Theme Element Customizations */
+[data-theme="light"] .glow-bg {
+    opacity: 0.06;
+}
+
+[data-theme="light"] .brand-text h1 {
+    background: linear-gradient(135deg, #0f172a 30%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .btn-secondary {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.16);
+}
+
+[data-theme="light"] .floating-bar {
+    background: rgba(255, 255, 255, 0.85);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .card-content code {
+    background: rgba(0, 0, 0, 0.04);
+    color: #0f172a;
+}
+
+[data-theme="light"] .notes-timeline::before {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.01) 100%);
+}
+
+[data-theme="light"] .update-card.selected {
+    background: rgba(79, 70, 229, 0.04);
+}
+
+[data-theme="light"] .update-card.selected .card-selector svg {
+    color: #fff;
+}
+
+
 * {
     margin: 0;
     padding: 0;
